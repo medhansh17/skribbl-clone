@@ -4,13 +4,13 @@ import http from "http";
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const socket = new Server(server);
 
 app.get("/", function (req, res) {
   res.sendFile(`${process.cwd()}/static/index.html`);
 });
 
-io.on("connection", (socket) => {
+socket.on("connection", (socket) => {
   console.log("New Connection", socket.id);
 });
 
