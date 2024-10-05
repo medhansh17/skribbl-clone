@@ -19,8 +19,24 @@ joinGameBtn.addEventListener("click", () => {
     roomId = data.roomId;
     document.getElementById("roomid").value = roomId;
     initializeGame();
+    console.log("hee ")
+   
   });
+
+  socket.on("drawData", (data) => {
+    const { color, x, y, lineWidth } = data;
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = color;
+  
+    //Drawing on the canvas based on the data received from others
+    ctx.lineTo(data[1], data[2]);
+    ctx.stroke();
+    console.log(data)
+    console.log("sdf")
+  });
+  
 });
+
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -53,7 +69,10 @@ function draw(e) {
 
   ctx.lineTo(x, y);
   ctx.stroke();
+  console.log("fds")
+
   socket.emit("drawData", { roomId, data: ["#333344", x, y] });
+  
 }
 
 canvas.addEventListener("mousedown", (e) => {
