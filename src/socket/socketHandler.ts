@@ -2,6 +2,7 @@ import { Server, Socket } from "socket.io";
 import { PlayerData } from "../types";
 import { generateEmptyRoom } from "../utils/gameController";
 import { getRoom, setRoom } from "../utils/redis";
+// import { get } from "http";
 
 enum GameEvent {
   CONNECT = "connect",
@@ -9,7 +10,7 @@ enum GameEvent {
   JOIN_ROOM = "joinRoom",
   LEAVE_ROOM = "leaveRoom",
   START_GAME = "startGame",
-  DRAW = "draw",
+  DRAW = "drawData",
   GUESS = "guess",
 
   JOINED_ROOM = "joinedRoom",
@@ -31,7 +32,6 @@ export function setupSocket(io: Server) {
           socket.emit("error", "Player data is required");
           return;
         }
-
         if (!roomId) {
           const newRoomId = await generateEmptyRoom(socket, playerData);
           socket.join(newRoomId);
@@ -40,15 +40,29 @@ export function setupSocket(io: Server) {
         } else {
           let room = await getRoom(roomId);
           if (!room) {
-            socket.emit("error", "Room not found");
-            return;
+            console.log("Room not found");
+            room = {
+              roomId,
+              creator: socket.id,
+              players: [],
+              gameState: {
+                currRound: 0,
+                drawingData: [],
+                guessedWords: [],
+                word: "",
+              },
+            };
+            await setRoom(room, roomId);
+            room = await getRoom(roomId);
+            console.log("Room created");
+            console.log(room);
           }
           room.players.push({
             ...playerData,
             playerId: socket.id,
             score: 0,
           });
-          await setRoom(roomId, room);
+          await setRoom(room, roomId);
           socket.join(roomId);
           io.to(roomId).emit(GameEvent.JOINED_ROOM, room);
         }
@@ -58,7 +72,7 @@ export function setupSocket(io: Server) {
     socket.on(GameEvent.DRAW, (data: any) => {
       const { roomId, data: drawData } = data;
       console.log(`Draw data recieved from room ${roomId}`);
-      socket.to(roomId).emit(GameEvent.DRAW_DATA, drawData);
+      io.to(roomId).emit(GameEvent.DRAW_DATA, drawData);
     });
 
     socket.on(GameEvent.GUESS, (data: any) => {

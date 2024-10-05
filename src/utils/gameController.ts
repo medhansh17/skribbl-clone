@@ -33,6 +33,6 @@ export async function generateEmptyRoom(socket: Socket, host: PlayerData) {
     },
   };
 
-  await setRoom(roomId, room);
+  await setRoom(room, roomId);
   return roomId;
 }

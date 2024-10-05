@@ -21,8 +21,8 @@ export async function getRoom(roomId: string) {
   return room ? JSON.parse(room) : null;
 }
 
-export async function setRoom(roomId: string, room: Room) {
-  await client.set(ROOM_PREFIX + roomId, JSON.stringify(room));
+export async function setRoom(roomId: Room, room: string) {
+  await client.set(ROOM_PREFIX + room, JSON.stringify(roomId));
 }
 
 export async function deleteRoom(roomId: string) {

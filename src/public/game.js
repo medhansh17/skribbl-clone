@@ -12,31 +12,27 @@ joinGameBtn.addEventListener("click", () => {
     return;
   }
   socket = io();
-  let params = [{ name: name, color: color }, rId];
-  socket.emit("joinRoom", params);
+  let params = [{ name: name, color: color }];
+  socket.emit("joinRoom", params, rId);
 
   socket.on("joinedRoom", (data) => {
     roomId = data.roomId;
     document.getElementById("roomid").value = roomId;
     initializeGame();
-    console.log("hee ")
-   
+    console.log("hee ");
   });
 
   socket.on("drawData", (data) => {
-    const { color, x, y, lineWidth } = data;
-    ctx.lineWidth = lineWidth;
+    const { color } = data;
+    ctx.lineWidth = data[3];
     ctx.strokeStyle = color;
-  
-    //Drawing on the canvas based on the data received from others
+
     ctx.lineTo(data[1], data[2]);
     ctx.stroke();
-    console.log(data)
-    console.log("sdf")
+    console.log(data);
+    console.log("sdf");
   });
-  
 });
-
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -65,14 +61,13 @@ function draw(e) {
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
-  console.log(x, y);
+  console.log(x, y, "here");
 
   ctx.lineTo(x, y);
   ctx.stroke();
-  console.log("fds")
+  console.log("fds");
 
-  socket.emit("drawData", { roomId, data: ["#333344", x, y] });
-  
+  socket.emit("drawData", { roomId, data: ["#333344", x, y, lineWidth] });
 }
 
 canvas.addEventListener("mousedown", (e) => {
